@@ -20,14 +20,14 @@ const projectRoot = resolve(__dirname, "..");
 
 // 候補日判定: 1コマ1時間、移動で前後30分確保
 // 土日祝: 9:00-20:00（最終枠20:00）→ カレンダーが 8:30-20:30 空いている日を候補
-// 平日: 18:00-20:00（最終枠20:00）→ カレンダーが 17:30-20:30 空いている日を候補
+// 平日: 19:00以降（19:00-20:00、最終枠20:00）→ カレンダーが 18:30-20:30 空いている日を候補
 const DOW_JA = ["日", "月", "火", "水", "木", "金", "土"];
 
 const WEEKEND_SLOT_LABEL = "9:00-20:00";
 const WEEKEND_CHECK = { startHour: 8, startMin: 30, endHour: 20, endMin: 30 };
 
-const WEEKDAY_SLOT_LABEL = "18:00-20:00";
-const WEEKDAY_CHECK = { startHour: 17, startMin: 30, endHour: 20, endMin: 30 };
+const WEEKDAY_SLOT_LABEL = "19:00-20:00";
+const WEEKDAY_CHECK = { startHour: 18, startMin: 30, endHour: 20, endMin: 30 };
 
 function getTargetMonth() {
   const env = process.env.TARGET_MONTH;
@@ -83,7 +83,7 @@ function isWindowFree(year, month, day, busy, check) {
   return overlapping.length === 0;
 }
 
-/** 日ごとに候補かどうかと枠ラベルを返す。キーは日(1..31)、値は "9:00-20:00" または "18:00-20:00" */
+/** 日ごとに候補かどうかと枠ラベルを返す。キーは日(1..31)、値は "9:00-20:00" または "19:00-20:00" */
 async function getFreeSlotsPerDay(auth, calendarId, year, month) {
   const calendar = google.calendar({ version: "v3", auth });
   const timeMin = new Date(year, month - 1, 1).toISOString();
@@ -129,7 +129,7 @@ async function main() {
     lines.push(`${month}/${day}（${DOW_JA[dow]}） ${label}`);
   }
   const body = lines.length === 0 ? "（該当なし）" : lines.join("\n");
-  const text = `【ゴルフレッスン】${year}年${month}月の予約候補日（土日祝 9:00-20:00 / 平日 18:00-20:00、1コマ1h・移動前後30分）:\n${body}`;
+  const text = `【ゴルフレッスン】${year}年${month}月の予約候補日（土日祝 9:00-20:00 / 平日 19:00以降、1コマ1h・移動前後30分）:\n${body}`;
   await postSlack(webhookUrl, text);
   console.log("Slack に投稿しました:", text);
 }
