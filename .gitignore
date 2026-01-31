@@ -1,0 +1,10 @@
+node_modules/
+.env
+config.yaml
+waitlist.json
+google-service-account.json
+*.log
+.playwright/
+test-results/
+playwright-report/
+playwright/.cache/

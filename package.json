@@ -1,0 +1,22 @@
+{
+  "name": "golf-lesson-reservation",
+  "version": "0.1.0",
+  "description": "ゴルフレッスン予約の自動化（appy-epark）",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "reserve": "node scripts/reserve.js",
+    "reserve:headed": "HEADED=1 node scripts/reserve.js",
+    "reserve:dry": "STOP_BEFORE_RESERVE=1 node scripts/reserve.js",
+    "reserve:dry:headed": "STOP_BEFORE_RESERVE=1 HEADED=1 node scripts/reserve.js",
+    "watch": "node scripts/watch-cancellation.js",
+    "watch:headed": "HEADED=1 node scripts/watch-cancellation.js",
+    "calendar-to-slack": "NODE_OPTIONS=--openssl-legacy-provider node scripts/post-calendar-candidates-to-slack.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "js-yaml": "^4.1.0",
+    "playwright": "^1.49.0"
+  }
+}

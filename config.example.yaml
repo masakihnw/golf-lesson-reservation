@@ -1,0 +1,55 @@
+# ゴルフレッスン予約 設定例
+# コピーして config.yaml を作成し、値を編集してください。
+# config.yaml は .gitignore に含まれるためコミットされません。
+
+# 予約対象月（翌月分を予約するときはその月を指定）
+# 形式: YYYY-MM
+targetMonth: "2026-02"
+
+# 予約してよい日（月の日付）。Slack の候補日を見て、実際に予約していい日だけを書く。
+# 空の場合は全候補日が対象。実行時に ALLOWED_DAYS=2,5,9 で上書きも可能。
+# 例: 月初週と月末週 → [1,2,3,4,5,6,7, 25,26,27,28,29,30,31]
+preferredDays:
+  - 1
+  - 2
+  - 3
+  - 7
+  - 8
+  - 25
+  - 26
+  - 27
+  - 28
+
+# 希望時間帯（開始時〜終了時）。この範囲内の枠を優先して予約する
+# 形式: "HH時〜HH時" または hourStart / hourEnd で指定
+timeRange:
+  start: 17   # 17時
+  end: 18     # 18時
+
+# その月の予約開始日時（省略時はデフォルト: 当月23日 22:00）
+# 月によって予約開放が違う場合に指定する
+# reservationOpensAt:
+#   day: 23
+#   hour: 22
+#   minute: 0
+
+# 今月だけ予約開始が違う例:
+# reservationOpensAt:
+#   day: 24
+#   hour: 10
+#   minute: 0
+
+# 予約する最大枠数（サイトの制約で月2枠まで）
+maxSlots: 2
+
+# 1件目と2件目の予約の最小間隔（日数）。この日数以上空けて2件目を予約する
+minDaysBetweenSlots: 7
+
+# キャンセル待ちの最大件数（2枠取れなかった場合に条件に合う〇を登録。月10件まで可能）
+maxWaitlist: 10
+
+# サイトのベースURL（通常は変更不要）
+baseUrl: "https://appy-epark.com"
+
+# ログイン画面のパス（appy-epark: /users/login/login.php）
+loginPath: "/users/login/login.php"

@@ -1,0 +1,74 @@
+# キャンセル監視: 条件に合うキャンセル枠が出たら即予約
+# 頻繁に実行（30分ごと）。waitlist.json に登録した日時は除外し、それ以外で条件に合う〇があれば1件予約して Slack 通知。
+
+name: キャンセル監視
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # 30分ごと
+  workflow_dispatch:
+    inputs:
+      target_month:
+        description: "対象月 (YYYY-MM)。省略時は翌月"
+        required: false
+        type: string
+
+env:
+  TZ: Asia/Tokyo
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Set target month (翌月)
+        id: set_month
+        run: |
+          if [ -n "${{ inputs.target_month }}" ]; then
+            echo "TARGET_MONTH=${{ inputs.target_month }}" >> $GITHUB_ENV
+          else
+            echo "TARGET_MONTH=$(date -d 'next month' +%Y-%m)" >> $GITHUB_ENV
+          fi
+
+      - name: Restore waitlist cache
+        uses: actions/cache/restore@v4
+        with:
+          path: waitlist.json
+          key: waitlist-${{ env.TARGET_MONTH }}
+
+      - name: Prepare config
+        run: cp config.example.yaml config.yaml
+
+      - name: Prepare .env
+        env:
+          GOLF_EMAIL: ${{ secrets.GOLF_RESERVATION_EMAIL }}
+          GOLF_PASSWORD: ${{ secrets.GOLF_RESERVATION_PASSWORD }}
+        run: |
+          echo "GOLF_RESERVATION_EMAIL=$GOLF_EMAIL" >> .env
+          echo "GOLF_RESERVATION_PASSWORD=$GOLF_PASSWORD" >> .env
+
+      - name: Run watch script
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TARGET_MONTH: ${{ env.TARGET_MONTH }}
+        run: npm run watch
